@@ -1,12 +1,12 @@
 import SectionHeader from '../components/SectionHeader';
 import { Code } from 'lucide-react';
 import { posts } from '../data/posts';
+import { Link } from 'react-router-dom';
 
 export default function BlogSection() {
-  const latest = posts.slice(0, 2);
-  const goBlog = () => {
-    location.hash = '#/blog';
-  };
+  const latest = [...posts]
+    .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())
+    .slice(0, 2);
   return (
     <section className="max-w-7xl mx-auto mb-16 md:mb-20 animate-fade-in" style={{ animationDelay: '0.26s' }}>
       <SectionHeader label="Blog" icon={Code} bgColor="bg-purple-200" rotate="-rotate-1" />
@@ -19,9 +19,9 @@ export default function BlogSection() {
           </article>
         ))}
       </div>
-      <button onClick={goBlog} className="mt-6 bg-black text-white border-4 border-black px-4 py-2 -rotate-1 shadow-[6px_6px_0_rgba(0,0,0,1)] hover:translate-x-0.5 hover:translate-y-0.5 hover:shadow-[4px_4px_0_rgba(0,0,0,1)] font-black">
+      <Link to="/blog" className="inline-block mt-6 bg-black text-white border-4 border-black px-4 py-2 -rotate-1 shadow-[6px_6px_0_rgba(0,0,0,1)] hover:translate-x-0.5 hover:translate-y-0.5 hover:shadow-[4px_4px_0_rgba(0,0,0,1)] font-black">
         Go to Blog
-      </button>
+      </Link>
     </section>
   );
 }

@@ -1,11 +1,9 @@
 import SectionHeader from '../components/SectionHeader';
 import { Code } from 'lucide-react';
 import { posts } from '../data/posts';
+import { Link } from 'react-router-dom';
 
 export default function BlogPage() {
-  const goHome = () => {
-    location.hash = '#/';
-  };
   return (
     <div className="p-4 md:p-8">
       <div className="max-w-7xl mx-auto">
@@ -23,7 +21,7 @@ export default function BlogPage() {
             </article>
           ))}
         </div>
-        <button onClick={goHome} className="mt-8 bg-black text-white border-4 border-black px-4 py-2 -rotate-1 shadow-[6px_6px_0_rgba(0,0,0,1)] font-black">Back</button>
+        <Link to="/" className="inline-block mt-8 bg-black text-white border-4 border-black px-4 py-2 -rotate-1 shadow-[6px_6px_0_rgba(0,0,0,1)] font-black">Back</Link>
       </div>
     </div>
   );

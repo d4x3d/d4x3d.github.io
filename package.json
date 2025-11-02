@@ -8,15 +8,18 @@
     "build": "vite build",
     "lint": "eslint .",
     "preview": "vite preview",
-    "typecheck": "tsc --noEmit -p tsconfig.app.json"
+    "typecheck": "tsc --noEmit -p tsconfig.app.json",
+    "test:github": "bun scripts/test_github.ts"
   },
   "dependencies": {
     "@supabase/supabase-js": "^2.57.4",
+    "convex": "^1.28.0",
     "gsap": "^3.12.5",
     "lucide-react": "^0.344.0",
     "postprocessing": "^6.37.8",
     "react": "^18.3.1",
     "react-dom": "^18.3.1",
+    "react-router-dom": "^6.26.2",
     "tech-stack-icons": "^3.3.2",
     "three": "^0.181.0"
   },

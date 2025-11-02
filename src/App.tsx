@@ -8,35 +8,34 @@ import SystemInfo from './sections/SystemInfo';
 import ClickSpark from './components/ClickSpark';
 import BlogSection from './sections/BlogSection';
 import BlogPage from './pages/BlogPage';
+import { Routes, Route } from 'react-router-dom';
 
 function App() {
   // Removed projects and skills per request
 
-  const host = typeof window !== 'undefined' ? window.location.hostname : '';
-  const ownerFromHost = host.endsWith('.github.io') ? host.replace('.github.io', '') : '';
-  const GH_USERNAME = (import.meta as any).env?.VITE_GITHUB_USERNAME || ownerFromHost || 'd4x3d';
+  const GH_USERNAME = 'auto';
   const profile = useGithubProfile(GH_USERNAME, 600000);
   // const isMobile = typeof window !== 'undefined' && window.matchMedia && window.matchMedia('(max-width: 768px)').matches;
-
-  const isBlog = typeof window !== 'undefined' && window.location.hash.startsWith('#/blog');
 
   return (
     <div className="relative min-h-screen bg-white text-black overflow-x-hidden">
 
       <div className="relative z-10 p-4 md:p-8">
         <ClickSpark sparkColor="#38bdf8" sparkCount={14} duration={700} sparkRadius={24} sparkSize={8} extraScale={1.2}>
-        {isBlog ? null : (<header className="mb-16 md:mb-20 pt-8 md:pt-12 animate-fade-in">
+        <Routes>
+          <Route path="/" element={<>
+        <header className="mb-16 md:mb-20 pt-8 md:pt-12 animate-fade-in">
           <div className="max-w-7xl mx-auto">
             <div className="inline-block bg-yellow-300 border-4 border-black px-4 py-5 md:px-6 md:py-7 rotate-1 shadow-[12px_12px_0px_0px_rgba(0,0,0,1)] mb-6 md:mb-8 transform transition-transform hover:scale-105">
               <h1 className="text-[clamp(2rem,8vw,3.5rem)] leading-none font-black uppercase tracking-tight text-black">
-                {(profile.data?.name || GH_USERNAME).toUpperCase()}
+                {(profile.data?.name || profile.data?.login || '').toUpperCase() || ' '}
               </h1>
             </div>
 
           </div>
-        </header>)}
+        </header>
 
-        {isBlog ? <BlogPage /> : (<section className="max-w-7xl mx-auto mb-16 md:mb-20 animate-fade-in" style={{ animationDelay: '0.1s' }}>
+        <section className="max-w-7xl mx-auto mb-16 md:mb-20 animate-fade-in" style={{ animationDelay: '0.1s' }}>
           <SectionHeader label="About Me" icon={Code} bgColor="bg-lime-200" rotate="rotate-1" />
 
           <div className="grid md:grid-cols-2 gap-6 md:gap-8">
@@ -80,17 +79,15 @@ function App() {
               </div>
             </div>
           </div>
-        </section>)}
+        </section>
 
-        {isBlog ? null : <GithubShowcase username={GH_USERNAME} />}
-        {isBlog ? null : <TechStackSection />}
-        {isBlog ? null : <BlogSection />}
+        <GithubShowcase username={GH_USERNAME} />
+        <TechStackSection />
+        <BlogSection />
 
-        {null}
+        <SystemInfo />
 
-        {isBlog ? null : <SystemInfo />}
-
-        {isBlog ? null : (<section className="max-w-7xl mx-auto mb-16 md:mb-20 animate-fade-in" style={{ animationDelay: '0.4s' }}>
+        <section className="max-w-7xl mx-auto mb-16 md:mb-20 animate-fade-in" style={{ animationDelay: '0.4s' }}>
           <SectionHeader label="Contact" icon={Mail} bgColor="bg-red-300" rotate="-rotate-1" />
 
           <div className="flex flex-wrap gap-4 md:gap-6">
@@ -129,9 +126,11 @@ function App() {
               <span className="font-black uppercase">X / Twitter</span>
             </a>
           </div>
-        </section>)}
+        </section>
 
-        {null}
+          </>} />
+          <Route path="/blog" element={<BlogPage />} />
+        </Routes>
         </ClickSpark>
       </div>
     </div>

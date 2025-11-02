@@ -1,5 +1,5 @@
 import { Github, Star, MapPin, Link as LinkIcon, Users } from 'lucide-react';
-import { useGithubProfile, usePinnedRepos, useContributions } from '../hooks/useGithub';
+import { useGithubProfile, usePinnedRepos, useContributions, useGithubStatus } from '../hooks/useGithub';
 import CommitGraph from '../components/CommitGraph';
 import { formatLocalTime } from '../lib/time';
 
@@ -9,6 +9,8 @@ export default function GithubShowcase({ username }: Props) {
   const profile = useGithubProfile(username);
   const pinned = usePinnedRepos(username);
   const contrib = useContributions(username);
+  const status = useGithubStatus();
+  const effectiveUser = profile.data?.login || status?.username || username;
 
   return (
     <section className="max-w-7xl mx-auto mb-16 md:mb-20 animate-fade-in" style={{ animationDelay: '0.25s' }}>
@@ -99,7 +101,7 @@ export default function GithubShowcase({ username }: Props) {
         ) : (
           <div className="overflow-x-auto">
             <img
-              src={`https://github.com/users/${username}/contributions`}
+              src={`https://github.com/users/${effectiveUser}/contributions`}
               alt="GitHub contribution graph"
               className="max-w-none"
               loading="lazy"
