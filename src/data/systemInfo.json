@@ -1,0 +1,26 @@
+{
+  "name": "lif5",
+  "os": "PikaOS 4",
+  "kernel": "Linux 6.17.5-pikaos x86_64",
+  "device": {
+    "vendor": "Dell Inc.",
+    "model": "Latitude 7389"
+  },
+  "cpu": {
+    "model": "Intel(R) Core(TM) i7-7600U CPU @ 2.80GHz"
+  },
+  "memory": "16 GB",
+  "storage": "256 GB",
+  "tools": {
+    "bun": "1.2.22",
+    "node": "v24.7.0",
+    "npm": "11.5.1",
+    "git": "2.50.0",
+    "python3": "3.13.5",
+    "gh": "2.46.0",
+    "curl": "8.14.1",
+    "wget": "1.25.0",
+    "ffmpeg": "7.1.1",
+    "uv": "0.8.22"
+  }
+}
