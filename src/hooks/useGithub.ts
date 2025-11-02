@@ -30,7 +30,11 @@ export type ContributionDay = { date: string; contributionCount: number; color: 
 
 export function useGithubProfile(username: string, pollMs = 600000) {
   const getProfile = (() => { try { return useAction((api as any).github.getProfile); } catch { return null; } })();
-  const [data, setData] = useState<GhUser | null>(null);
+  // Instant hydrate from cache
+  const cacheKey = `gh:profile:${username || 'auto'}`;
+  const cached = typeof window !== 'undefined' ? window.localStorage.getItem(cacheKey) : null;
+  const cachedVal: GhUser | null = cached ? (() => { try { const o = JSON.parse(cached); return o.d && (Date.now()-o.t<600000) ? o.d as GhUser : null; } catch { return null; } })() : null;
+  const [data, setData] = useState<GhUser | null>(cachedVal);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   useEffect(() => {
@@ -41,7 +45,10 @@ export function useGithubProfile(username: string, pollMs = 600000) {
         try {
           if (getProfile) {
             const d = await getProfile({ username: username === 'auto' ? undefined : username });
-            if (alive) setData(d as any);
+            if (alive) {
+              setData(d as any);
+              try { localStorage.setItem(cacheKey, JSON.stringify({ t: Date.now(), d })); } catch {}
+            }
           }
         } catch (e) {
           if (alive) setError(String(e));
@@ -51,7 +58,8 @@ export function useGithubProfile(username: string, pollMs = 600000) {
       };
       run();
     };
-    fetchOnce();
+    // If we had cache, start background refresh slightly later to avoid jank
+    if (cachedVal) setTimeout(fetchOnce, 50); else fetchOnce();
     const t = pollMs ? setInterval(fetchOnce, pollMs) : null;
     return () => {
       alive = false;
@@ -63,7 +71,10 @@ export function useGithubProfile(username: string, pollMs = 600000) {
 
 export function usePinnedRepos(username: string, pollMs = 600000) {
   const getPinnedAction = (() => { try { return useAction((api as any).github.getPinned); } catch { return null; } })();
-  const [data, setData] = useState<PinnedRepo[] | null>(null);
+  const cacheKey = `gh:pinned:${username || 'auto'}`;
+  const cached = typeof window !== 'undefined' ? window.localStorage.getItem(cacheKey) : null;
+  const cachedVal: PinnedRepo[] | null = cached ? (() => { try { const o = JSON.parse(cached); return o.d && (Date.now()-o.t<600000) ? o.d as PinnedRepo[] : null; } catch { return null; } })() : null;
+  const [data, setData] = useState<PinnedRepo[] | null>(cachedVal);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   useEffect(() => {
@@ -73,14 +84,17 @@ export function usePinnedRepos(username: string, pollMs = 600000) {
       try {
         if (!getPinnedAction) throw new Error('Convex not connected');
         const pinned = await getPinnedAction({ username: username === 'auto' ? undefined : username, limit: 6 });
-        if (alive) setData(pinned as any);
+        if (alive) {
+          setData(pinned as any);
+          try { localStorage.setItem(cacheKey, JSON.stringify({ t: Date.now(), d: pinned })); } catch {}
+        }
       } catch (e) {
         if (alive) setError(String(e));
       } finally {
         if (alive) setLoading(false);
       }
     };
-    run();
+    if (cachedVal) setTimeout(run, 50); else run();
     const t = pollMs ? setInterval(run, pollMs) : null;
     return () => {
       alive = false;
@@ -92,7 +106,10 @@ export function usePinnedRepos(username: string, pollMs = 600000) {
 
 export function useContributions(username: string, pollMs = 600000) {
   const getContribAction = (() => { try { return useAction((api as any).github.getContributions); } catch { return null; } })();
-  const [data, setData] = useState<ContributionDay[] | null>(null);
+  const cacheKey = `gh:contrib:${username || 'auto'}`;
+  const cached = typeof window !== 'undefined' ? window.localStorage.getItem(cacheKey) : null;
+  const cachedVal: ContributionDay[] | null = cached ? (() => { try { const o = JSON.parse(cached); return o.d && (Date.now()-o.t<600000) ? o.d as ContributionDay[] : null; } catch { return null; } })() : null;
+  const [data, setData] = useState<ContributionDay[] | null>(cachedVal);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   useEffect(() => {
@@ -103,7 +120,11 @@ export function useContributions(username: string, pollMs = 600000) {
       const go = async () => {
         try {
           const res = (await getContribAction({ username: username === 'auto' ? undefined : username })) as any;
-          if (alive) setData(res.enabled ? (res.days as any) : null);
+          if (alive) {
+            const next = res.enabled ? (res.days as any) : null;
+            setData(next);
+            try { localStorage.setItem(cacheKey, JSON.stringify({ t: Date.now(), d: next })); } catch {}
+          }
         } catch (e) {
           if (alive) setError(String(e));
         } finally {
@@ -112,7 +133,7 @@ export function useContributions(username: string, pollMs = 600000) {
       };
       go();
     };
-    run();
+    if (cachedVal) setTimeout(run, 50); else run();
     const t = pollMs ? setInterval(run, pollMs) : null;
     return () => {
       alive = false;

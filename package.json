@@ -12,6 +12,8 @@
     "test:github": "bun scripts/test_github.ts"
   },
   "dependencies": {
+    "@auth/core": "^0.32.0",
+    "@convex-dev/auth": "^0.0.64",
     "@supabase/supabase-js": "^2.57.4",
     "convex": "^1.28.0",
     "gsap": "^3.12.5",

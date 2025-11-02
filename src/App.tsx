@@ -9,6 +9,7 @@ import ClickSpark from './components/ClickSpark';
 import BlogSection from './sections/BlogSection';
 import BlogPage from './pages/BlogPage';
 import { Routes, Route } from 'react-router-dom';
+// import { useGithubStatus } from './hooks/useGithub';
 
 function App() {
   // Removed projects and skills per request
@@ -22,6 +23,7 @@ function App() {
 
       <div className="relative z-10 p-4 md:p-8">
         <ClickSpark sparkColor="#38bdf8" sparkCount={14} duration={700} sparkRadius={24} sparkSize={8} extraScale={1.2}>
+        {null}
         <Routes>
           <Route path="/" element={<>
         <header className="mb-16 md:mb-20 pt-8 md:pt-12 animate-fade-in">
@@ -138,3 +140,4 @@ function App() {
 }
 
 export default App;
+// OwnerBadge removed per request
