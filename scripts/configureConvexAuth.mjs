@@ -1,7 +1,7 @@
 import { exportJWK, exportPKCS8, generateKeyPair } from "jose";
 import { spawnSync } from "node:child_process";
 
-const SITE_URL = process.env.SITE_URL || "http://localhost:5173";
+const SITE_URL = process.env.SITE_URL || "https://d4x3d.pages.dev";
 
 const keys = await generateKeyPair("RS256", {
   extractable: true,
