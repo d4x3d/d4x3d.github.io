@@ -6,7 +6,7 @@ import { HashRouter } from 'react-router-dom';
 import { ConvexProvider, ConvexReactClient } from 'convex/react';
 import { ConvexAuthProvider } from '@convex-dev/auth/react';
 
-const convexUrl = (import.meta as any).env?.VITE_CONVEX_URL as string | undefined;
+const convexUrl = "https://combative-pigeon-282.convex.cloud";
 const convexClient = convexUrl ? new ConvexReactClient(convexUrl) : null;
 // Preconnect to Convex to reduce initial handshake latency
 if (typeof document !== 'undefined' && convexUrl) {
