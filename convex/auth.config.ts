@@ -1,7 +1,7 @@
 export default {
   providers: [
     {
-      domain: process.env.CONVEX_SITE_URL,
+      domain: "https://d4x3d.pages.dev",
       applicationID: "convex",
     },
   ],
