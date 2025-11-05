@@ -148,3 +148,22 @@ export const toggleLike = mutation({
     }
   },
 });
+
+export const userLiked = query({
+  args: { slug: v.string() },
+  handler: async (ctx, { slug }) => {
+    const viewer = await getViewer(ctx);
+    if (!viewer) return false;
+    const post = await ctx.db
+      .query("posts")
+      .withIndex("by_slug", (q) => q.eq("slug", slug))
+      .unique();
+    if (!post) return false;
+    const userKey = (viewer.user.githubId as string | undefined) ?? String(viewer.userId);
+    const existing = await ctx.db
+      .query("likes")
+      .withIndex("by_post_user", (q) => q.eq("postId", post._id).eq("userName", userKey))
+      .unique();
+    return Boolean(existing);
+  },
+});
