@@ -17,6 +17,9 @@ function App() {
   const GH_USERNAME = 'auto';
   const profile = useGithubProfile(GH_USERNAME, 600000);
   // const isMobile = typeof window !== 'undefined' && window.matchMedia && window.matchMedia('(max-width: 768px)').matches;
+  
+  // Static fallback name to prevent layout shift - will be replaced by GitHub data instantly from cache
+  const displayName = profile.data?.name || profile.data?.login || 'DAVID OLADAPO';
 
   return (
     <div className="relative min-h-screen bg-white text-black overflow-x-hidden">
@@ -30,7 +33,7 @@ function App() {
           <div className="max-w-7xl mx-auto">
             <div className="inline-block bg-yellow-300 border-4 border-black px-4 py-5 md:px-6 md:py-7 rotate-1 shadow-[12px_12px_0px_0px_rgba(0,0,0,1)] mb-6 md:mb-8 transform transition-transform hover:scale-105">
               <h1 className="text-[clamp(2rem,8vw,3.5rem)] leading-none font-black uppercase tracking-tight text-black">
-                {(profile.data?.name || profile.data?.login || '').toUpperCase() || ' '}
+                {displayName.toUpperCase()}
               </h1>
             </div>
 

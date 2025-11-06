@@ -35,12 +35,12 @@ export function useGithubProfile(username: string, pollMs = 600000) {
   const cached = typeof window !== 'undefined' ? window.localStorage.getItem(cacheKey) : null;
   const cachedVal: GhUser | null = cached ? (() => { try { const o = JSON.parse(cached); return o.d && (Date.now()-o.t<600000) ? o.d as GhUser : null; } catch { return null; } })() : null;
   const [data, setData] = useState<GhUser | null>(cachedVal);
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(!cachedVal); // Start with false if we have cached data
   const [error, setError] = useState<string | null>(null);
   useEffect(() => {
     let alive = true;
     const fetchOnce = () => {
-      setLoading(true);
+      if (!cachedVal) setLoading(true); // Only show loading if no cache
       const run = async () => {
         try {
           if (getProfile) {
@@ -58,8 +58,8 @@ export function useGithubProfile(username: string, pollMs = 600000) {
       };
       run();
     };
-    // If we had cache, start background refresh slightly later to avoid jank
-    if (cachedVal) setTimeout(fetchOnce, 50); else fetchOnce();
+    // Fetch immediately, no artificial delay
+    fetchOnce();
     const t = pollMs ? setInterval(fetchOnce, pollMs) : null;
     return () => {
       alive = false;
@@ -75,12 +75,12 @@ export function usePinnedRepos(username: string, pollMs = 600000) {
   const cached = typeof window !== 'undefined' ? window.localStorage.getItem(cacheKey) : null;
   const cachedVal: PinnedRepo[] | null = cached ? (() => { try { const o = JSON.parse(cached); return o.d && (Date.now()-o.t<600000) ? o.d as PinnedRepo[] : null; } catch { return null; } })() : null;
   const [data, setData] = useState<PinnedRepo[] | null>(cachedVal);
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(!cachedVal);
   const [error, setError] = useState<string | null>(null);
   useEffect(() => {
     let alive = true;
     const run = async () => {
-      setLoading(true);
+      if (!cachedVal) setLoading(true);
       try {
         if (!getPinnedAction) throw new Error('Convex not connected');
         const pinned = await getPinnedAction({ username: username === 'auto' ? undefined : username, limit: 6 });
@@ -94,7 +94,7 @@ export function usePinnedRepos(username: string, pollMs = 600000) {
         if (alive) setLoading(false);
       }
     };
-    if (cachedVal) setTimeout(run, 50); else run();
+    run();
     const t = pollMs ? setInterval(run, pollMs) : null;
     return () => {
       alive = false;
@@ -110,13 +110,13 @@ export function useContributions(username: string, pollMs = 600000) {
   const cached = typeof window !== 'undefined' ? window.localStorage.getItem(cacheKey) : null;
   const cachedVal: ContributionDay[] | null = cached ? (() => { try { const o = JSON.parse(cached); return o.d && (Date.now()-o.t<600000) ? o.d as ContributionDay[] : null; } catch { return null; } })() : null;
   const [data, setData] = useState<ContributionDay[] | null>(cachedVal);
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(!cachedVal);
   const [error, setError] = useState<string | null>(null);
   useEffect(() => {
     let alive = true;
     if (!getContribAction) { setError('Convex not connected'); setLoading(false); return; }
     const run = () => {
-      setLoading(true);
+      if (!cachedVal) setLoading(true);
       const go = async () => {
         try {
           const res = (await getContribAction({ username: username === 'auto' ? undefined : username })) as any;
@@ -133,7 +133,7 @@ export function useContributions(username: string, pollMs = 600000) {
       };
       go();
     };
-    if (cachedVal) setTimeout(run, 50); else run();
+    run();
     const t = pollMs ? setInterval(run, pollMs) : null;
     return () => {
       alive = false;

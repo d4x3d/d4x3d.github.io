@@ -44,4 +44,10 @@ export default defineSchema({
     userName: v.string(),
     displayName: v.optional(v.string()),
   }).index("by_post_user", ["postId", "userName"]).index("by_post", ["postId"]),
+
+  githubCache: defineTable({
+    key: v.string(),
+    data: v.any(),
+    expiresAt: v.number(),
+  }).index("by_key", ["key"]).index("by_expiry", ["expiresAt"]),
 });
