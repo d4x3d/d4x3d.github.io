@@ -1,14 +1,17 @@
 import { Code, Coffee, Github, Mail, Linkedin } from 'lucide-react';
 // Background removed per request
 import SectionHeader from './components/SectionHeader';
-import GithubShowcase from './sections/GithubShowcase';
 import { useGithubProfile } from './hooks/useGithub';
 import TechStackSection from './sections/TechStackSection';
 import SystemInfo from './sections/SystemInfo';
 import ClickSpark from './components/ClickSpark';
 import BlogSection from './sections/BlogSection';
-import BlogPage from './pages/BlogPage';
 import { Routes, Route } from 'react-router-dom';
+import { lazy, Suspense, useState, useEffect } from 'react';
+
+// Lazy load heavy components to reduce initial bundle size
+const BlogPage = lazy(() => import('./pages/BlogPage'));
+const GithubShowcase = lazy(() => import('./sections/GithubShowcase'));
 // import { useGithubStatus } from './hooks/useGithub';
 
 function App() {
@@ -21,6 +24,14 @@ function App() {
   
   // Static fallback name to prevent layout shift - will be replaced by GitHub data instantly from cache
   const displayName = profile.data?.name || profile.data?.login || 'DAVID OLADAPO';
+  
+  // Defer GitHub showcase until page is interactive to improve initial load
+  const [showGithub, setShowGithub] = useState(false);
+  useEffect(() => {
+    // Load GitHub showcase after a short delay to let critical content render first
+    const timer = setTimeout(() => setShowGithub(true), 100);
+    return () => clearTimeout(timer);
+  }, []);
 
   return (
     <div className="relative min-h-screen bg-white text-black overflow-x-hidden">
@@ -29,6 +40,11 @@ function App() {
         <ClickSpark sparkColor="#38bdf8" sparkCount={14} duration={700} sparkRadius={24} sparkSize={8} extraScale={1.2}>
         {null}
         <Routes>
+          <Route path="/blog" element={
+            <Suspense fallback={<div className="p-8 text-center font-black">Loading...</div>}>
+              <BlogPage />
+            </Suspense>
+          } />
           <Route path="/" element={<>
         <header className="mb-16 md:mb-20 pt-8 md:pt-12 animate-fade-in">
           <div className="max-w-7xl mx-auto">
@@ -87,7 +103,13 @@ function App() {
           </div>
         </section>
 
-        <GithubShowcase username={GH_USERNAME} />
+        {showGithub ? (
+          <Suspense fallback={<div className="max-w-7xl mx-auto mb-16 p-8 text-center font-black">Loading GitHub stats...</div>}>
+            <GithubShowcase username={GH_USERNAME} />
+          </Suspense>
+        ) : (
+          <div className="max-w-7xl mx-auto mb-16 p-8 text-center font-black animate-pulse">Loading GitHub stats...</div>
+        )}
         <TechStackSection />
         <BlogSection />
 
@@ -135,7 +157,6 @@ function App() {
         </section>
 
           </>} />
-          <Route path="/blog" element={<BlogPage />} />
         </Routes>
         </ClickSpark>
       </div>
