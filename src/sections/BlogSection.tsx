@@ -7,7 +7,8 @@ import { api } from '../../convex/_generated/api';
 import { useQuery } from 'convex/react';
 
 export default function BlogSection() {
-  const all = useQuery((api as any).blog.list) as any[] | undefined;
+  // Use the optimized query to avoid duplicate subscriptions
+  const all = useQuery((api as any).blog.listWithData) as any[] | undefined;
   const latest = (all || []).slice(0, 2);
   return (
     <section className="max-w-7xl mx-auto mb-16 md:mb-20 animate-fade-in" style={{ animationDelay: '0.26s' }}>

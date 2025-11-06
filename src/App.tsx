@@ -15,7 +15,8 @@ function App() {
   // Removed projects and skills per request
 
   const GH_USERNAME = 'auto';
-  const profile = useGithubProfile(GH_USERNAME, 600000);
+  // Disable auto-polling - only fetch on page load. Data cached in localStorage for 10min anyway
+  const profile = useGithubProfile(GH_USERNAME, 0);
   // const isMobile = typeof window !== 'undefined' && window.matchMedia && window.matchMedia('(max-width: 768px)').matches;
   
   // Static fallback name to prevent layout shift - will be replaced by GitHub data instantly from cache

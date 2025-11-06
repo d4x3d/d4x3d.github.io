@@ -6,9 +6,10 @@ import { formatLocalTime } from '../lib/time';
 type Props = { username: string };
 
 export default function GithubShowcase({ username }: Props) {
-  const profile = useGithubProfile(username);
-  const pinned = usePinnedRepos(username);
-  const contrib = useContributions(username);
+  // Disable auto-polling - rely on localStorage cache which has 10min TTL
+  const profile = useGithubProfile(username, 0);
+  const pinned = usePinnedRepos(username, 0);
+  const contrib = useContributions(username, 0);
   const status = useGithubStatus();
   const effectiveUser = profile.data?.login || status?.username || username;
 

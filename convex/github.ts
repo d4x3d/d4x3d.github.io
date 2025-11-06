@@ -15,107 +15,69 @@ const rest = async (path: string, token?: string) => {
 
 const getUsername = (u?: string | null) => u || process.env.GITHUB_USERNAME || "d4x3d";
 
-// Cache helper - checks and updates cache in Convex DB
-const withCache = async (ctx: any, key: string, ttlMs: number, fetchFn: () => Promise<any>) => {
-  const now = Date.now();
-  
-  // Check cache
-  const cached = await ctx.db
-    .query("githubCache")
-    .withIndex("by_key", (q: any) => q.eq("key", key))
-    .first();
-  
-  if (cached && cached.expiresAt > now) {
-    return cached.data;
-  }
-  
-  // Fetch fresh data
-  const data = await fetchFn();
-  
-  // Update cache
-  if (cached) {
-    await ctx.db.patch(cached._id, { data, expiresAt: now + ttlMs });
-  } else {
-    await ctx.db.insert("githubCache", { key, data, expiresAt: now + ttlMs });
-  }
-  
-  return data;
-};
+// Note: Actions don't have db access in Convex, so we rely on client-side caching in localStorage
 
 export const getProfile = action({
   args: { username: v.optional(v.string()) },
-  handler: async (ctx, { username }) => {
+  handler: async (_ctx, { username }) => {
     const user = getUsername(username);
     const token = process.env.GITHUB_TOKEN;
-    const cacheKey = `profile:${user}`;
-    
-    return await withCache(ctx, cacheKey, 10 * 60 * 1000, async () => {
-      return await rest(`/users/${user}`, token);
-    });
+    return await rest(`/users/${user}`, token);
   },
 });
 
 export const getPinned = action({
   args: { username: v.optional(v.string()), limit: v.optional(v.number()) },
-  handler: async (ctx, { username, limit = 6 }) => {
+  handler: async (_ctx, { username, limit = 6 }) => {
     const user = getUsername(username);
     const token = process.env.GITHUB_TOKEN;
-    const cacheKey = `pinned:${user}:${limit}`;
-    
-    return await withCache(ctx, cacheKey, 10 * 60 * 1000, async () => {
-      if (!token) {
-        // Fallback to recently updated repos
-        const repos = await rest(`/users/${user}/repos?sort=updated&per_page=${limit}`);
-        return (repos as any[]).map(r => ({
-          id: r.id,
-          name: r.name,
-          description: r.description,
-          stargazerCount: r.stargazers_count,
-          url: r.html_url,
-          primaryLanguage: r.language ? { name: r.language, color: "#999" } : null,
-        }));
-      }
-      const q = `query($login:String!,$n:Int!){ user(login:$login){ pinnedItems(first:$n, types:[REPOSITORY]){ nodes{ ... on Repository { id name description stargazerCount url primaryLanguage { name color } } } } } }`;
-      const res = await fetch("https://api.github.com/graphql", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
-        },
-        body: JSON.stringify({ query: q, variables: { login: user, n: limit } }),
-      });
-      const json = await res.json();
-      if (!res.ok || json.errors) throw new Error("GitHub GraphQL error");
-      return json.data.user.pinnedItems.nodes;
+    if (!token) {
+      // Fallback to recently updated repos
+      const repos = await rest(`/users/${user}/repos?sort=updated&per_page=${limit}`);
+      return (repos as any[]).map(r => ({
+        id: r.id,
+        name: r.name,
+        description: r.description,
+        stargazerCount: r.stargazers_count,
+        url: r.html_url,
+        primaryLanguage: r.language ? { name: r.language, color: "#999" } : null,
+      }));
+    }
+    const q = `query($login:String!,$n:Int!){ user(login:$login){ pinnedItems(first:$n, types:[REPOSITORY]){ nodes{ ... on Repository { id name description stargazerCount url primaryLanguage { name color } } } } } }`;
+    const res = await fetch("https://api.github.com/graphql", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`,
+      },
+      body: JSON.stringify({ query: q, variables: { login: user, n: limit } }),
     });
+    const json = await res.json();
+    if (!res.ok || json.errors) throw new Error("GitHub GraphQL error");
+    return json.data.user.pinnedItems.nodes;
   },
 });
 
 export const getContributions = action({
   args: { username: v.optional(v.string()) },
-  handler: async (ctx, { username }) => {
+  handler: async (_ctx, { username }) => {
     const user = getUsername(username);
     const token = process.env.GITHUB_TOKEN;
     if (!token) return { enabled: false };
-    
-    const cacheKey = `contrib:${user}`;
-    
-    return await withCache(ctx, cacheKey, 10 * 60 * 1000, async () => {
-      const q = `query($login:String!){ user(login:$login){ contributionsCollection { contributionCalendar { weeks { contributionDays { date contributionCount color } } } } } }`;
-      const res = await fetch("https://api.github.com/graphql", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
-        },
-        body: JSON.stringify({ query: q, variables: { login: user } }),
-      });
-      const json = await res.json();
-      if (!res.ok || json.errors) throw new Error("GitHub GraphQL error");
-      const weeks = json.data.user.contributionsCollection.contributionCalendar.weeks || [];
-      const days = weeks.flatMap((w: any) => w.contributionDays);
-      return { enabled: true, days };
+    const q = `query($login:String!){ user(login:$login){ contributionsCollection { contributionCalendar { weeks { contributionDays { date contributionCount color } } } } } }`;
+    const res = await fetch("https://api.github.com/graphql", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`,
+      },
+      body: JSON.stringify({ query: q, variables: { login: user } }),
     });
+    const json = await res.json();
+    if (!res.ok || json.errors) throw new Error("GitHub GraphQL error");
+    const weeks = json.data.user.contributionsCollection.contributionCalendar.weeks || [];
+    const days = weeks.flatMap((w: any) => w.contributionDays);
+    return { enabled: true, days };
   },
 });
 
