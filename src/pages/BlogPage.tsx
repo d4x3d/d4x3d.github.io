@@ -55,7 +55,8 @@ export default function BlogPage() {
     if (!me) {
       ensureRef.current = false;
     }
-  }, [me, ensureProfile]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [me]); // Only depend on me, not ensureProfile to prevent unnecessary re-runs
 
   const authLoading = me === undefined;
   const signedIn = Boolean(me);
