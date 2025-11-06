@@ -34,6 +34,48 @@ export const list = query({
   },
 });
 
+// Optimized query that returns all post data with comments, likes, and user like status in one query
+export const listWithData = query({
+  args: {},
+  handler: async (ctx) => {
+    const viewer = await getViewer(ctx);
+    const userKey = viewer ? ((viewer.user.githubId as string | undefined) ?? String(viewer.userId)) : null;
+    
+    const posts = await ctx.db
+      .query("posts")
+      .withIndex("by_created")
+      .order("desc")
+      .collect();
+    
+    // Batch fetch all comments and likes for all posts
+    const postsWithData = await Promise.all(
+      posts.map(async (post) => {
+        const comments = await ctx.db
+          .query("comments")
+          .withIndex("by_post", (q) => q.eq("postId", post._id))
+          .order("desc")
+          .collect();
+        
+        const likes = await ctx.db
+          .query("likes")
+          .withIndex("by_post", (q) => q.eq("postId", post._id))
+          .collect();
+        
+        const userLiked = userKey ? likes.some((like) => like.userName === userKey) : false;
+        
+        return {
+          ...post,
+          comments,
+          likesCount: likes.length,
+          userLiked,
+        };
+      })
+    );
+    
+    return postsWithData;
+  },
+});
+
 export const create = mutation({
   args: { title: v.string(), slug: v.string(), summary: v.string(), content: v.string() },
   handler: async (ctx, args) => {

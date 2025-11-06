@@ -32,7 +32,7 @@ const createEmptyDraft = (): Draft => ({ title: '', slug: '', summary: '', conte
 export default function BlogPage() {
   const { signIn, signOut } = useAuthActions();
   const me = useQuery((api as any).users.me) as Viewer | null | undefined;
-  const posts = useQuery((api as any).blog.list) as any[] | undefined;
+  const posts = useQuery((api as any).blog.listWithData) as any[] | undefined;
 
   const createPost = useMutation((api as any).blog.create);
   const updatePost = useMutation((api as any).blog.update);
@@ -379,14 +379,12 @@ type PostCardProps = {
 function PostCard({ post, isOwner, canInteract, onEdit, onRequireAuth }: PostCardProps) {
   const deletePost = useMutation((api as any).blog.remove);
   const toggleLike = useMutation((api as any).blog.toggleLike);
-  const commentData = useQuery((api as any).blog.comments, { slug: post.slug }) || { comments: [], likes: 0, userLiked: false };
-  const comments = commentData?.comments ?? [];
-  const likes = commentData?.likes ?? 0;
+  // Use data from the optimized query instead of separate queries
+  const comments = post.comments ?? [];
+  const likes = post.likesCount ?? 0;
+  const userLiked = post.userLiked ?? false;
   const [copySuccess, setCopySuccess] = useState<string>('');
   const [isExpanded, setIsExpanded] = useState(false);
-
-  // Check if current user has liked this post
-  const userLiked = useQuery((api as any).blog.userLiked, { slug: post.slug }) ?? false;
 
   const handleDelete = async () => {
     if (typeof window !== 'undefined') {
