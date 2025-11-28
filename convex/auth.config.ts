@@ -1,7 +1,9 @@
-// This file is for @convex-dev/auth configuration
-// For GitHub OAuth, we don't need additional config here
-// as it's configured in auth.ts with the GitHub provider
+// Convex Auth configuration
+// The providers are configured in auth.ts
+// This file can be used for additional auth configuration if needed
 
-export default {
-  // No additional providers needed - using GitHub OAuth from auth.ts
+const authConfig = {
+  providers: [],
 };
+
+export default authConfig;
