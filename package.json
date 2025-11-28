@@ -14,27 +14,22 @@
   "dependencies": {
     "@auth/core": "^0.32.0",
     "@convex-dev/auth": "^0.0.64",
-    "@supabase/supabase-js": "^2.57.4",
     "@tailwindcss/typography": "^0.5.19",
     "convex": "^1.28.0",
-    "gsap": "^3.12.5",
     "highlight.js": "^11.11.1",
     "lucide-react": "^0.344.0",
-    "postprocessing": "^6.37.8",
     "react": "^18.3.1",
     "react-dom": "^18.3.1",
     "react-markdown": "^10.1.0",
     "react-router-dom": "^6.26.2",
     "rehype-highlight": "^7.0.2",
     "remark-gfm": "^4.0.1",
-    "tech-stack-icons": "^3.3.2",
-    "three": "^0.180.0"
+    "tech-stack-icons": "^3.3.2"
   },
   "devDependencies": {
     "@eslint/js": "^9.9.1",
     "@types/react": "^18.3.5",
     "@types/react-dom": "^18.3.0",
-    "@types/three": "^0.181.0",
     "@vitejs/plugin-react": "^4.3.1",
     "autoprefixer": "^10.4.18",
     "eslint": "^9.9.1",
